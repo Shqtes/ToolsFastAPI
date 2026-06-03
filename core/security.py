@@ -1,0 +1,63 @@
+"""
+Created by shqtes on 03.06.2026.
+"""
+import os
+import jwt
+from datetime import datetime, timedelta, UTC
+from pwdlib import PasswordHash
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from database.session import get_session
+import models.user as user_models
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+
+http_bearer = HTTPBearer()  # HTTPBearer - объект содержащий тип токена и сам токен
+
+password_hasher = PasswordHash.recommended()
+
+
+def hash_password(password: str) -> str:
+    return password_hasher.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return password_hasher.verify(plain_password, hashed_password)
+
+
+def create_access_token(user_id: int) -> str:
+    # "sub" и "exp" - это зарезервированные стандартные поля, sub - subject(ID ресурса),
+    # exp - expiration(дата и время истечения токена)
+    payload = {
+        "sub": str(user_id),
+        "exp": datetime.now(UTC) + timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")))
+    }
+
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_token(token: str) -> dict:
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+
+async def get_current_user(
+        credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+        session: AsyncSession = Depends(get_session)
+):
+    token = credentials.credentials
+
+    try:
+        payload = decode_token(token)
+
+        user_id = int(payload["sub"])
+    except (jwt.PyJWTError, ValueError, KeyError, TypeError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    user = await session.get(user_models.User, user_id)
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
+    return user
