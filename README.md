@@ -1,5 +1,5 @@
 
-# FastAPI Example
+# ToolsFastAPI
 
 Пример полноценного API, реализованного на FastAPI + SQLAlchemy с внедрением JWT-авторизации.
 
