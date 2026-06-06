@@ -2,7 +2,6 @@
 Created by shqtes on 03.06.2026.
 """
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 import os
 
@@ -14,10 +13,6 @@ engine = create_async_engine(url=DATABASE_URL, echo=False, pool_size=10, max_ove
 
 # expire_on_commit=False предотвращает удаление объекта из памяти при завершении транзакции.
 session_maker = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
-
-
-class Base(DeclarativeBase):
-    pass
 
 
 async def get_session():

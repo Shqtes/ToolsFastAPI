@@ -33,10 +33,10 @@ async def register(
     await session.commit()
     await session.refresh(user)
 
-    return None
+    return user
 
 
-@router.post("/login", response_model=user_schemas.TokenResponse)
+@router.post("/login", response_model=user_schemas.TokenResponse, status_code=status.HTTP_200_OK)
 async def login(
         user_data: user_schemas.UserLogin,
         session: AsyncSession = Depends(get_session)
@@ -46,7 +46,7 @@ async def login(
     user = result.scalars().one_or_none()
 
     if user is None or not verify_password(user_data.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bad credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     token = create_access_token(user.user_id)
 

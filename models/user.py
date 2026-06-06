@@ -3,7 +3,7 @@ Created by shqtes on 03.06.2026.
 """
 from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
-from database.session import Base
+from models.base import Base
 
 
 class User(Base):

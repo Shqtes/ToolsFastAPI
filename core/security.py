@@ -14,7 +14,7 @@ import models.user as user_models
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
-http_bearer = HTTPBearer()  # HTTPBearer - объект содержащий тип токена и сам токен
+http_bearer = HTTPBearer(auto_error=False)  # HTTPBearer - объект содержащий тип токена и сам токен
 
 password_hasher = PasswordHash.recommended()
 
@@ -28,10 +28,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(user_id: int) -> str:
-    # "sub" и "exp" - это зарезервированные стандартные поля, sub - subject(ID ресурса),
+    # "sub" и "exp" - это зарезервированные стандартные поля, sub - subject(ID ресурса, согласно стандарту),
     # exp - expiration(дата и время истечения токена)
     payload = {
-        "sub": str(user_id),
+        "sub": str(user_id),  # Согласно стандарту данные в sub всегда являются строкой.
         "exp": datetime.now(UTC) + timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")))
     }
 
@@ -46,18 +46,23 @@ async def get_current_user(
         credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
         session: AsyncSession = Depends(get_session)
 ):
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Token required")
+
     token = credentials.credentials
 
     try:
         payload = decode_token(token)
 
         user_id = int(payload["sub"])
+    # PyJWTError возникнет, если подпись (signature) будет подделана, или истек срок действия токена
+    # PyJWTError включает исключения ExpiredSignatureError и InvalidSignatureError.
     except (jwt.PyJWTError, ValueError, KeyError, TypeError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     user = await session.get(user_models.User, user_id)
 
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     return user
