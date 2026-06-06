@@ -504,4 +504,3 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ## Authors
 
 - [@shqtes](https://github.com/Shqtes)
-
