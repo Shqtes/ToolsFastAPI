@@ -12,7 +12,7 @@ import models.user as user_models
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=user_schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(
         user_data: user_schemas.UserRegister,
         session: AsyncSession = Depends(get_session)
@@ -33,7 +33,7 @@ async def register(
     await session.commit()
     await session.refresh(user)
 
-    return user
+    return {"user_id": user.user_id, "email": user.email}
 
 
 @router.post("/login", response_model=user_schemas.TokenResponse, status_code=status.HTTP_200_OK)

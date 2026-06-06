@@ -1,5 +1,5 @@
 
-# ToolsFastAPI
+# FastAPI Example
 
 Пример полноценного API, реализованного на FastAPI + SQLAlchemy с внедрением JWT-авторизации.
 
@@ -50,6 +50,26 @@ pip install -r requirements.txt
 Запуск API на ASGI-сервере:
 ```bash
   uvicorn main:app --reload
+```
+
+Создание таблиц БД:
+```postgres-sql
+CREATE TABLE IF NOT EXISTS users
+(
+	user_id SERIAL PRIMARY KEY NOT NULL,
+	email TEXT NOT NULL UNIQUE,
+	password_hash TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tools
+(
+	tool_id SERIAL NOT NULL,
+	"name" VARCHAR(25) NOT NULL,
+	description TEXT NULL,
+	price NUMERIC(7, 2) NOT NULL,
+	quantity INTEGER NOT NULL,
+	CONSTRAINT pk_tools PRIMARY KEY (tool_id)
+);
 ```
 ## Environment Variables
 
@@ -136,6 +156,38 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 }
 ```
 
+### Получить информацию о себе
+```http
+  GET /users/me
+```
+#### Входные параметры:
+| Параметр  | Тип      | Местоположение  | Описание  |
+| :-------- | :------- | :-------------- | :-------- |
+| `Authorization` | `Bearer-Token` | `Headers` | `Токен для авторизации` |
+
+#### Ответ сервера:
+| STATUS_CODE  | Content-Type  |
+| :----------- | :------------ |
+| `200 (OK)`   | `application/json` |
+
+Пример ответа:
+```json
+{
+  "id": 3,
+  "email": "shqtes@gmail.com"
+}
+```
+
+| STATUS_CODE  | Content-Type  |
+| :----------- | :------------ |
+| `401 (Unauthorized)`   | `application/json` |
+
+Пример ответа:
+```json
+{
+    "detail": "Invalid token"
+}
+```
 
 ### Получить все инструменты
 

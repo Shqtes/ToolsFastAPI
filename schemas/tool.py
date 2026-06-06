@@ -4,7 +4,7 @@ Created by shqtes on 03.06.2026.
 from pydantic import Field, ConfigDict, BaseModel
 from decimal import Decimal
 
-base_config = ConfigDict(from_attributes=True)  # Чтобы
+base_config = ConfigDict(from_attributes=True)  # Чтобы преобразовывать SQLAlchemy объекты в json.
 
 
 class ToolBase(BaseModel):

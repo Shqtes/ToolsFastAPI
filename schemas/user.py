@@ -14,6 +14,16 @@ class UserLogin(BaseModel):
     password: str = Field(..., max_length=255)
 
 
+class UserResponse(BaseModel):
+    id: int
+    email: EmailStr
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+
+class UserInfoResponse(BaseModel):
+    id: int
+    email: EmailStr
