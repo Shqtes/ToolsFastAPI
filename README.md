@@ -51,7 +51,7 @@ pip install -r requirements.txt
 ```bash
   uvicorn main:app --reload
 ```
-    ## Environment Variables
+## Environment Variables
 
 Создайте файл `.env`:
 
