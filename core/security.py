@@ -32,7 +32,18 @@ def create_access_token(user_id: int) -> str:
     # exp - expiration(дата и время истечения токена)
     payload = {
         "sub": str(user_id),  # Согласно стандарту данные в sub всегда являются строкой.
-        "exp": datetime.now(UTC) + timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")))
+        "type": "access",  # Тип токена
+        "exp": datetime.now(UTC) + timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))),
+    }
+
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def create_refresh_token(user_id: int) -> str:
+    payload = {
+        "sub": str(user_id),
+        "type": "refresh",
+        "exp": datetime.now(UTC) + timedelta(days=int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS"))),
     }
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
@@ -53,6 +64,9 @@ async def get_current_user(
 
     try:
         payload = decode_token(token)
+
+        if payload.get("type") != "access":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
         user_id = int(payload["sub"])
     # PyJWTError возникнет, если подпись (signature) будет подделана, или истек срок действия токена

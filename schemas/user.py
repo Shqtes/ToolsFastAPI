@@ -14,12 +14,22 @@ class UserLogin(BaseModel):
     password: str = Field(..., max_length=255)
 
 
+class RefreshToken(BaseModel):
+    refresh_token: str
+
+
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
 
 
 class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+
+class RefreshTokenResponse(BaseModel):
     access_token: str
     token_type: str
 
