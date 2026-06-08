@@ -40,7 +40,7 @@
 Клонирование кода репозитория:
 
 ```bash
-git clone ...
+git clone https://github.com/Shqtes/ToolsFastAPI
 ```
 
 Установка зависимостей проекта:
