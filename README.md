@@ -158,6 +158,7 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 ```json
 {
   "access_token": "your_token",
+  "refresh_token": "your_refresh_token",
   "token_type": "bearer"
 }
 ```
